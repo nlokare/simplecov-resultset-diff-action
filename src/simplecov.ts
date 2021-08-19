@@ -69,7 +69,7 @@ export class Coverage {
   files: FileCoverage[]
 
   constructor(resultset: ResultSet) {
-    const coverages = resultset['RSpec']['coverage']
+    const coverages = resultset['Minitest']['coverage']
     this.files = []
     for (const filename of Object.keys(coverages)) {
       const coverage = coverages[filename]
