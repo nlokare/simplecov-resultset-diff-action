@@ -19,7 +19,7 @@ function doesPathExists(filepath: string): void {
 }
 
 function parseResultset(resultsetPath: string): ResultSet {
-  const content = fs.readFileSync(path.resolve(WORKSPACE, resultsetPath))
+  const content = fs.readFileSync(path.resolve(__dirname, resultsetPath))
   return JSON.parse(content.toString()) as ResultSet
 }
 
@@ -70,11 +70,11 @@ function trimWorkspacePath(filename: string): string {
   }
 }
 
-function formatDiff(diff: FileCoverageDiff): [string, string, string] {
+function formatDiff(diff: FileCoverageDiff): [string, string] {
   return [
     trimWorkspacePath(diff.filename),
-    formatDiffItem(diff.lines),
-    formatDiffItem(diff.branches)
+    formatDiffItem(diff.lines)
+    // formatDiffItem(diff.branches)
   ]
 }
 
@@ -84,6 +84,9 @@ async function run(): Promise<void> {
       base: core.getInput('base-resultset-path'),
       head: core.getInput('head-resultset-path')
     }
+
+    // eslint-disable-next-line no-console
+    console.log('resultsetPaths: ', resultsetPaths)
 
     const paths = {
       base: path.resolve(process.cwd(), resultsetPaths.base),
@@ -118,7 +121,8 @@ async function run(): Promise<void> {
     const message = `## Coverage difference
 ${content}
 `
-
+    // eslint-disable-next-line no-console
+    console.log('MESSAGE: ', message)
     /**
      * Publish a comment in the PR with the diff result.
      */
@@ -138,6 +142,8 @@ ${content}
       body: message
     })
   } catch (error) {
+    // eslint-disable-next-line no-console
+    console.log('Error: ', error)
     core.setFailed(error.message)
   }
 }

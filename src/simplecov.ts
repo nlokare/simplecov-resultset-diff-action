@@ -24,7 +24,7 @@ type BranchCoverage = {
 type FileCoverage = {
   filename: string
   lines: number
-  branches: number
+  // branches: number
 }
 
 function floor(n: number, digits = 0): number {
@@ -44,39 +44,42 @@ function linesCoverage(coverage: LineCoverage): number {
   return floor((covered / rows) * 100, 2)
 }
 
-function branchesCoverages(coverage: BranchCoverage): number {
-  const conditions = Object.keys(coverage)
-  if (conditions.length === 0) {
-    return 100
-  }
+// function branchesCoverages(coverage: BranchCoverage): number {
+//   const conditions = Object.keys(coverage)
+//   if (conditions.length === 0) {
+//     return 100
+//   }
 
-  let total = 0
-  let covered = 0
-  for (const k of conditions) {
-    const cond = coverage[k]
-    for (const branch of Object.keys(cond)) {
-      total += 1
-      const hit = cond[branch]
-      if (hit > 0) {
-        covered += 1
-      }
-    }
-  }
-  return floor((covered / total) * 100, 2)
-}
+//   let total = 0
+//   let covered = 0
+//   for (const k of conditions) {
+//     const cond = coverage[k]
+//     for (const branch of Object.keys(cond)) {
+//       total += 1
+//       const hit = cond[branch]
+//       if (hit > 0) {
+//         covered += 1
+//       }
+//     }
+//   }
+//   return floor((covered / total) * 100, 2)
+// }
 
 export class Coverage {
   files: FileCoverage[]
 
-  constructor(resultset: ResultSet) {
-    const coverages = resultset['Minitest']['coverage']
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  constructor(resultset: any) {
+    // eslint-disable-next-line no-console
+    console.log('Unit Tests: ', resultset['Unit Tests'])
+    const coverages = resultset['Unit Tests']['coverage']
     this.files = []
     for (const filename of Object.keys(coverages)) {
       const coverage = coverages[filename]
       this.files.push({
         filename,
-        lines: linesCoverage(coverage.lines),
-        branches: branchesCoverages(coverage.branches)
+        lines: linesCoverage(coverage.lines)
+        // branches: branchesCoverages(coverage.branches)
       })
     }
   }
@@ -127,9 +130,9 @@ function isDifference(cov1?: FileCoverage, cov2?: FileCoverage): boolean {
   if (cov1!.lines !== cov2!.lines) {
     return true
   }
-  if (cov1!.branches !== cov2!.branches) {
-    return true
-  }
+  // if (cov1!.branches !== cov2!.branches) {
+  //   return true
+  // }
   return false
 }
 
@@ -139,10 +142,10 @@ export type FileCoverageDiff = {
     from: number | null
     to: number | null
   }
-  branches: {
-    from: number | null
-    to: number | null
-  }
+  // branches: {
+  //   from: number | null
+  //   to: number | null
+  // }
 }
 
 function makeDiff(cov1?: FileCoverage, cov2?: FileCoverage): FileCoverageDiff {
@@ -153,20 +156,20 @@ function makeDiff(cov1?: FileCoverage, cov2?: FileCoverage): FileCoverageDiff {
   if (!cov1 && cov2) {
     return {
       filename: cov2.filename,
-      lines: {from: null, to: cov2.lines},
-      branches: {from: null, to: cov2.branches}
+      lines: {from: null, to: cov2.lines}
+      // branches: {from: null, to: cov2.branches}
     }
   }
   if (!cov2 && cov1) {
     return {
       filename: cov1.filename,
-      lines: {from: cov1.lines, to: null},
-      branches: {from: cov1.branches, to: null}
+      lines: {from: cov1.lines, to: null}
+      // branches: {from: cov1.branches, to: null}
     }
   }
   return {
     filename: cov1!.filename,
-    lines: {from: cov1!.lines, to: cov2!.lines},
-    branches: {from: cov1!.branches, to: cov2!.branches}
+    lines: {from: cov1!.lines, to: cov2!.lines}
+    // branches: {from: cov1!.branches, to: cov2!.branches}
   }
 }

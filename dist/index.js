@@ -610,7 +610,7 @@ function doesPathExists(filepath) {
     }
 }
 function parseResultset(resultsetPath) {
-    const content = fs.readFileSync(path.resolve(WORKSPACE, resultsetPath));
+    const content = fs.readFileSync(path.resolve(__dirname, resultsetPath));
     return JSON.parse(content.toString());
 }
 function truncPercentage(n) {
@@ -654,8 +654,8 @@ function trimWorkspacePath(filename) {
 function formatDiff(diff) {
     return [
         trimWorkspacePath(diff.filename),
-        formatDiffItem(diff.lines),
-        formatDiffItem(diff.branches)
+        formatDiffItem(diff.lines)
+        // formatDiffItem(diff.branches)
     ];
 }
 function run() {
@@ -665,6 +665,8 @@ function run() {
                 base: core.getInput('base-resultset-path'),
                 head: core.getInput('head-resultset-path')
             };
+            // eslint-disable-next-line no-console
+            console.log('resultsetPaths: ', resultsetPaths);
             const paths = {
                 base: path.resolve(process.cwd(), resultsetPaths.base),
                 head: path.resolve(process.cwd(), resultsetPaths.head)
@@ -693,6 +695,8 @@ function run() {
             const message = `## Coverage difference
 ${content}
 `;
+            // eslint-disable-next-line no-console
+            console.log('MESSAGE: ', message);
             /**
              * Publish a comment in the PR with the diff result.
              */
@@ -711,6 +715,8 @@ ${content}
             });
         }
         catch (error) {
+            // eslint-disable-next-line no-console
+            console.log('Error: ', error);
             core.setFailed(error.message);
         }
     });
@@ -6438,35 +6444,38 @@ function linesCoverage(coverage) {
     const covered = effectiveLines.filter(hit => hit > 0).length;
     return floor((covered / rows) * 100, 2);
 }
-function branchesCoverages(coverage) {
-    const conditions = Object.keys(coverage);
-    if (conditions.length === 0) {
-        return 100;
-    }
-    let total = 0;
-    let covered = 0;
-    for (const k of conditions) {
-        const cond = coverage[k];
-        for (const branch of Object.keys(cond)) {
-            total += 1;
-            const hit = cond[branch];
-            if (hit > 0) {
-                covered += 1;
-            }
-        }
-    }
-    return floor((covered / total) * 100, 2);
-}
+// function branchesCoverages(coverage: BranchCoverage): number {
+//   const conditions = Object.keys(coverage)
+//   if (conditions.length === 0) {
+//     return 100
+//   }
+//   let total = 0
+//   let covered = 0
+//   for (const k of conditions) {
+//     const cond = coverage[k]
+//     for (const branch of Object.keys(cond)) {
+//       total += 1
+//       const hit = cond[branch]
+//       if (hit > 0) {
+//         covered += 1
+//       }
+//     }
+//   }
+//   return floor((covered / total) * 100, 2)
+// }
 class Coverage {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     constructor(resultset) {
-        const coverages = resultset['RSpec']['coverage'];
+        // eslint-disable-next-line no-console
+        console.log('Unit Tests: ', resultset['Unit Tests']);
+        const coverages = resultset['Unit Tests']['coverage'];
         this.files = [];
         for (const filename of Object.keys(coverages)) {
             const coverage = coverages[filename];
             this.files.push({
                 filename,
-                lines: linesCoverage(coverage.lines),
-                branches: branchesCoverages(coverage.branches)
+                lines: linesCoverage(coverage.lines)
+                // branches: branchesCoverages(coverage.branches)
             });
         }
     }
@@ -6512,9 +6521,9 @@ function isDifference(cov1, cov2) {
     if (cov1.lines !== cov2.lines) {
         return true;
     }
-    if (cov1.branches !== cov2.branches) {
-        return true;
-    }
+    // if (cov1!.branches !== cov2!.branches) {
+    //   return true
+    // }
     return false;
 }
 function makeDiff(cov1, cov2) {
@@ -6524,21 +6533,21 @@ function makeDiff(cov1, cov2) {
     if (!cov1 && cov2) {
         return {
             filename: cov2.filename,
-            lines: { from: null, to: cov2.lines },
-            branches: { from: null, to: cov2.branches }
+            lines: { from: null, to: cov2.lines }
+            // branches: {from: null, to: cov2.branches}
         };
     }
     if (!cov2 && cov1) {
         return {
             filename: cov1.filename,
-            lines: { from: cov1.lines, to: null },
-            branches: { from: cov1.branches, to: null }
+            lines: { from: cov1.lines, to: null }
+            // branches: {from: cov1.branches, to: null}
         };
     }
     return {
         filename: cov1.filename,
-        lines: { from: cov1.lines, to: cov2.lines },
-        branches: { from: cov1.branches, to: cov2.branches }
+        lines: { from: cov1.lines, to: cov2.lines }
+        // branches: {from: cov1!.branches, to: cov2!.branches}
     };
 }
 
