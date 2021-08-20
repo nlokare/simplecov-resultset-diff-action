@@ -71,11 +71,7 @@ function trimWorkspacePath(filename: string): string {
 }
 
 function formatDiff(diff: FileCoverageDiff): [string, string] {
-  return [
-    trimWorkspacePath(diff.filename),
-    formatDiffItem(diff.lines)
-    // formatDiffItem(diff.branches)
-  ]
+  return [trimWorkspacePath(diff.filename), formatDiffItem(diff.lines)]
 }
 
 async function run(): Promise<void> {
@@ -84,9 +80,6 @@ async function run(): Promise<void> {
       base: core.getInput('base-resultset-path'),
       head: core.getInput('head-resultset-path')
     }
-
-    // eslint-disable-next-line no-console
-    console.log('resultsetPaths: ', resultsetPaths)
 
     const paths = {
       base: path.resolve(process.cwd(), resultsetPaths.base),
@@ -112,10 +105,7 @@ async function run(): Promise<void> {
     if (diff.length === 0) {
       content = 'No differences'
     } else {
-      content = markdownTable([
-        ['Filename', 'Lines', 'Branches'],
-        ...diff.map(formatDiff)
-      ])
+      content = markdownTable([['Filename', 'Lines'], ...diff.map(formatDiff)])
     }
 
     const message = `## Coverage difference
